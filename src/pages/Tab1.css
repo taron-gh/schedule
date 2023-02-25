@@ -10,3 +10,7 @@ ion-card{
 ion-modal ion-label{
     margin-bottom: 10px;
 }
+ion-card{
+    position: relative;
+}
+
