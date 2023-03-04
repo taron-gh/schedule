@@ -139,7 +139,7 @@ const Tab1: React.FC = () => {
                 return <IonItem lines="none" key={i}>
                   <IonCard onClick={() =>
                     presentAlert({
-                      header: 'Are you sure that you want to delete this task?',
+                      header: 'Are you sure that you want to delete this subject?',
                       buttons: [
                         {
                           text: 'Cancel',
@@ -196,7 +196,7 @@ const Tab1: React.FC = () => {
               <IonButtons slot="start">
                 <IonButton onClick={() => modal.current?.dismiss()}>Cancel</IonButton>
               </IonButtons>
-              <IonTitle>Add Task</IonTitle>
+              <IonTitle>Add Subject</IonTitle>
               <IonButtons slot="end">
                 <IonButton strong={true} disabled={isConfirmDisabled} onClick={() => {
                   // setTaskName("");
@@ -214,14 +214,14 @@ const Tab1: React.FC = () => {
           </IonHeader>
           <IonContent className="ion-padding">
             <IonItem>
-              <IonLabel position="stacked">Enter task name</IonLabel>
-              <IonInput type="text" placeholder="Task name" value={name} onIonChange={(e) => {
+              <IonLabel position="stacked">Enter subject name</IonLabel>
+              <IonInput type="text" placeholder="Subject name" value={name} onIonChange={(e) => {
 
                 setTaskName(e.target.value)
               }} />
 
-              <IonLabel position="stacked">Enter task description</IonLabel>
-              <IonInput type="text" placeholder="Task description" value={description} onIonChange={(e) => { setTaskDescription(e.target.value) }} />
+              <IonLabel position="stacked">Enter subject description</IonLabel>
+              <IonInput type="text" placeholder="Subject description" value={description} onIonChange={(e) => { setTaskDescription(e.target.value) }} />
 
               <IonLabel position="stacked">Enter start time</IonLabel>
               <IonDatetime presentation='time' hourCycle='h23' onIonChange={(e) => {
