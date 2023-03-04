@@ -2,7 +2,7 @@ import { IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardS
 import './Tab1.css';
 import * as icons from 'ionicons/icons';
 import { OverlayEventDetail } from '@ionic/react/dist/types/components/react-component-lib/interfaces';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Storage } from '@ionic/storage';
 
@@ -12,6 +12,10 @@ const Tab1: React.FC = () => {
   const store = new Storage();
   store.create();
 
+  function updateScheduleStorage(arr: any[][]){
+    store.set("tab1", JSON.stringify(arr));
+  }
+  
 
   const [presentAlert] = useIonAlert();
   const d = new Date();
@@ -47,7 +51,15 @@ const Tab1: React.FC = () => {
   const [description, setTaskDescription] = useState<string | number | undefined | null>("");
   const [startTime, setStartTime] = useState<string | number | undefined | null>(0);
   // const [endTime, setEndTime] = useState<string | number | undefined | null>(0);
-
+  useEffect(() => {
+    store.get("tab1").then((res => JSON.parse(res))).then((data) => {
+      // console.log(data)
+      if(data){
+        setSchedule(data)
+      }
+    })
+  }, [schedule])
+  
   let isConfirmDisabled: boolean = true;
   if (name) {
     isConfirmDisabled = false;
@@ -60,6 +72,7 @@ const Tab1: React.FC = () => {
       taskStartTime: startTime,
       // taskEndTime: endTime
     }, 'confirm');
+    
   }
 
   function onWillDismiss(ev: CustomEvent<OverlayEventDetail>) {
@@ -88,15 +101,15 @@ const Tab1: React.FC = () => {
         // endTime: ev.detail.data.taskEndTime
       });
       setSchedule(newS);
-
+      updateScheduleStorage(newS);
     }
   }
 
   return (
     <IonPage>
-      <IonHeader collapse="condense">
+      <IonHeader className="ion-padding" collapse="condense">
         <IonToolbar>
-          <IonTitle size="large">Schedule</IonTitle>
+          <IonTitle size="large">{"\n"}Schedule</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
@@ -142,6 +155,7 @@ const Tab1: React.FC = () => {
                               return index != i;
                             });
                             setSchedule(newS);
+                            updateScheduleStorage(newS);
                           },
                         },
                       ]
@@ -166,7 +180,7 @@ const Tab1: React.FC = () => {
         </IonReorderGroup>
 
         <IonFab slot="fixed" vertical="bottom" horizontal="end" >
-          <IonFabButton id="open-modal" onClick={() => {
+          <IonFabButton id="open-tab1-modal" onClick={() => {
             setTaskName("");
             setTaskDescription("");
             setStartTime(d.getHours() + ":" + d.getMinutes())
@@ -176,7 +190,7 @@ const Tab1: React.FC = () => {
         </IonFab>
 
 
-        <IonModal ref={modal} trigger="open-modal" onWillDismiss={(ev) => onWillDismiss(ev)}>
+        <IonModal ref={modal} trigger="open-tab1-modal" onWillDismiss={(ev) => onWillDismiss(ev)}>
           <IonHeader>
             <IonToolbar>
               <IonButtons slot="start">

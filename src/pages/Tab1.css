@@ -1,11 +1,17 @@
+
+
 ion-fab ion-icon {
     color: white;
-  }
+}
 
 ion-card{
     width: 100%;
     margin: 10px;
-    
+    --ion-background-color: #00c37b;
+    color: white;
+}
+ion-card-subtitle{
+    color: white;
 }
 ion-modal ion-label{
     margin-bottom: 10px;

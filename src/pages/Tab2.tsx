@@ -1,16 +1,14 @@
 import { IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonDatetime, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonModal, IonPage, IonReorder, IonReorderGroup, IonSelect, IonSelectOption, IonTitle, IonToolbar, ItemReorderEventDetail, useIonAlert } from '@ionic/react';
 import { OverlayEventDetail } from '@ionic/react/dist/types/components/react-component-lib/interfaces';
 import { parseISO, format } from 'date-fns';
-import { useRef, useState } from 'react';
+import { SetStateAction, useEffect, useRef, useState } from 'react';
 import * as icons from 'ionicons/icons';
 import ExploreContainer from '../components/ExploreContainer';
 import './Tab2.css';
+import { Storage } from '@ionic/storage';
 
 const Tab2: React.FC = () => {
-  const weekday = ["sunday", "monday", "wuesday", "wednesday", "thursday", "friday", "saturday"];
   const [presentAlert] = useIonAlert();
-  const d = new Date();
-  let day = weekday[d.getDay()];
 
   /*
     {
@@ -21,7 +19,14 @@ const Tab2: React.FC = () => {
       text: ""
     }
   */
+  const store = new Storage();
+  store.create();
 
+  function updateScheduleStorage(arr: any[]) {
+    store.set("tab2", JSON.stringify(arr));
+  }
+
+  
   function handleReorder(event: CustomEvent<ItemReorderEventDetail>) {
     console.log('Dragged from index', event.detail.from, 'to', event.detail.to);
     event.detail.complete();
@@ -33,6 +38,15 @@ const Tab2: React.FC = () => {
   const [tasks, setTasks] = useState<any[]>([]);
   const [name, setTaskName] = useState<string | number | undefined | null>("");
   const [description, setTaskDescription] = useState<string | number | undefined | null>("");
+
+  useEffect(() => {
+    store.get("tab2").then((res => JSON.parse(res))).then((data) => {
+      // console.log(data)
+      if(data){
+        setTasks(data)
+      }
+    })
+  }, [tasks])
 
   let isConfirmDisabled: boolean = true;
   if (name) {
@@ -62,7 +76,7 @@ const Tab2: React.FC = () => {
         description: ev.detail.data.taskDescription,
       });
       setTasks(newT);
-
+      updateScheduleStorage(newT);
     }
   }
 
@@ -99,6 +113,7 @@ const Tab2: React.FC = () => {
                               return index != i;
                             });
                             setTasks(newT);
+                            updateScheduleStorage(newT);
                           },
                         },
                       ]
@@ -112,7 +127,7 @@ const Tab2: React.FC = () => {
                         {elem.description}
                       </IonCardContent>
                     }
-                    
+
                   </IonCard>
                   <IonReorder slot="end"></IonReorder>
                 </IonItem>
@@ -123,7 +138,7 @@ const Tab2: React.FC = () => {
         </IonReorderGroup>
 
         <IonFab slot="fixed" vertical="bottom" horizontal="end" >
-          <IonFabButton id="open-modal" onClick={() => {
+          <IonFabButton id="open-tab2-modal" onClick={() => {
             setTaskName("");
             setTaskDescription("");
 
@@ -133,7 +148,7 @@ const Tab2: React.FC = () => {
         </IonFab>
 
 
-        <IonModal ref={modal} trigger="open-modal" onWillDismiss={(ev) => onWillDismiss(ev)}>
+        <IonModal ref={modal} trigger="open-tab2-modal" onWillDismiss={(ev) => onWillDismiss(ev)}>
           <IonHeader>
             <IonToolbar>
               <IonButtons slot="start">
@@ -158,8 +173,8 @@ const Tab2: React.FC = () => {
               }} />
 
               <IonLabel position="stacked">Enter task description</IonLabel>
-              <IonInput type="text" placeholder="Task description" value={description} onIonChange={(e) => { 
-                setTaskDescription(e.target.value) 
+              <IonInput type="text" placeholder="Task description" value={description} onIonChange={(e) => {
+                setTaskDescription(e.target.value)
               }} />
             </IonItem>
           </IonContent>
