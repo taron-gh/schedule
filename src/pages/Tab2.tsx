@@ -1,4 +1,4 @@
-import { IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonDatetime, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonModal, IonPage, IonReorder, IonReorderGroup, IonSelect, IonSelectOption, IonTitle, IonToolbar, ItemReorderEventDetail } from '@ionic/react';
+import { IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCheckbox, IonContent, IonDatetime, IonFab, IonFabButton, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonModal, IonPage, IonReorder, IonReorderGroup, IonSelect, IonSelectOption, IonTitle, IonToolbar, ItemReorderEventDetail, useIonAlert } from '@ionic/react';
 import { OverlayEventDetail } from '@ionic/react/dist/types/components/react-component-lib/interfaces';
 import { parseISO, format } from 'date-fns';
 import { useRef, useState } from 'react';
@@ -8,7 +8,7 @@ import './Tab2.css';
 
 const Tab2: React.FC = () => {
   const weekday = ["sunday", "monday", "wuesday", "wednesday", "thursday", "friday", "saturday"];
-
+  const [presentAlert] = useIonAlert();
   const d = new Date();
   let day = weekday[d.getDay()];
 
@@ -33,13 +33,16 @@ const Tab2: React.FC = () => {
   const [tasks, setTasks] = useState<any[]>([]);
   const [name, setTaskName] = useState<string | number | undefined | null>("");
   const [description, setTaskDescription] = useState<string | number | undefined | null>("");
-  const [isCompleted, setIsCompleted] = useState<boolean>(false);
+
+  let isConfirmDisabled: boolean = true;
+  if (name) {
+    isConfirmDisabled = false;
+  }
 
   function confirm() {
     modal.current?.dismiss({
       taskName: name,
       taskDescription: description,
-      taskCompleted: isCompleted
     }, 'confirm');
   }
 
@@ -57,7 +60,6 @@ const Tab2: React.FC = () => {
       newT.push({
         name: ev.detail.data.taskName,
         description: ev.detail.data.taskDescription,
-        isCompleted: ev.detail.data.taskIsCompleted,
       });
       setTasks(newT);
 
@@ -74,39 +76,58 @@ const Tab2: React.FC = () => {
       <IonContent fullscreen>
 
 
-
         <IonReorderGroup disabled={false} onIonItemReorder={handleReorder}>
-
           {
             tasks[0] && tasks.map((elem, i) => {
               if (elem) {
-                console.log(elem);
-
-                // return <IonCard key={i}></IonCard>
                 return <IonItem lines="none" key={i}>
-                  <IonCard>
-                  <IonCardHeader>
-                    <IonCardTitle></IonCardTitle>
-                    <IonCardSubtitle>{elem.name}</IonCardSubtitle>
-                  </IonCardHeader>
-
-                  <IonCardContent>
-                    aa
-                  </IonCardContent>
-                </IonCard>
+                  <IonCard onClick={() =>
+                    presentAlert({
+                      header: 'Are you sure that you want to remove this task from your TODO list?',
+                      buttons: [
+                        {
+                          text: 'Cancel',
+                          role: 'cancel',
+                          handler: () => { },
+                        },
+                        {
+                          text: 'Yes',
+                          role: 'confirm',
+                          handler: () => {
+                            let newT = [...tasks];
+                            newT = tasks.filter(function (value, index, arr) {
+                              return index != i;
+                            });
+                            setTasks(newT);
+                          },
+                        },
+                      ]
+                    })}>
+                    <IonCardHeader>
+                      <IonCardTitle></IonCardTitle>
+                      <IonCardSubtitle>{elem.name}</IonCardSubtitle>
+                    </IonCardHeader>
+                    {
+                      elem.description && <IonCardContent>
+                        {elem.description}
+                      </IonCardContent>
+                    }
+                    
+                  </IonCard>
                   <IonReorder slot="end"></IonReorder>
                 </IonItem>
               }
 
             })
           }
-
-
-
         </IonReorderGroup>
 
         <IonFab slot="fixed" vertical="bottom" horizontal="end" >
-          <IonFabButton id="open-modal">
+          <IonFabButton id="open-modal" onClick={() => {
+            setTaskName("");
+            setTaskDescription("");
+
+          }}>
             <IonIcon icon={icons.add}></IonIcon>
           </IonFabButton>
         </IonFab>
@@ -118,9 +139,11 @@ const Tab2: React.FC = () => {
               <IonButtons slot="start">
                 <IonButton onClick={() => modal.current?.dismiss()}>Cancel</IonButton>
               </IonButtons>
-              <IonTitle>Add Task</IonTitle>
+              <IonTitle>Add TODO</IonTitle>
               <IonButtons slot="end">
-                <IonButton strong={true} disabled={false} onClick={() => confirm()}>
+                <IonButton strong={true} disabled={isConfirmDisabled} onClick={() => {
+                  confirm();
+                }}>
                   Confirm
                 </IonButton>
               </IonButtons>
@@ -129,29 +152,15 @@ const Tab2: React.FC = () => {
           <IonContent className="ion-padding">
             <IonItem>
               <IonLabel position="stacked">Enter task name</IonLabel>
-              <IonInput type="text" placeholder="Task name" value={name} onIonChange={(e) => { setTaskName(e.target.value) }} />
+              <IonInput type="text" placeholder="Task name" value={name} onIonChange={(e) => {
+
+                setTaskName(e.target.value)
+              }} />
 
               <IonLabel position="stacked">Enter task description</IonLabel>
-              <IonInput type="text" placeholder="Task description" value={description} onIonChange={(e) => { setTaskDescription(e.target.value) }} />
-
-              <IonLabel position="stacked">Enter start time</IonLabel>
-              <IonDatetime presentation='time' hourCycle='h23' onIonChange={(e) => {
-                const dateFromIonDatetime = e.detail.value as string;
-                const hour = format(parseISO(dateFromIonDatetime), 'H');
-                const minute = format(parseISO(dateFromIonDatetime), 'm');
-                console.log(minute); // Jun 4, 2021
-                // setStartTime(hour + ":" + minute)
-              }}></IonDatetime>
-
-              <IonLabel position="stacked">Enter end time</IonLabel>
-              <IonDatetime presentation='time' hourCycle='h23' onIonChange={(e) => {
-                const dateFromIonDatetime = e.detail.value as string;
-                const hour = format(parseISO(dateFromIonDatetime), 'H');
-                const minute = format(parseISO(dateFromIonDatetime), 'm');
-                console.log(minute); // Jun 4, 2021
-                // setEndTime(hour + ":" + minute)
-              }}></IonDatetime>
-
+              <IonInput type="text" placeholder="Task description" value={description} onIonChange={(e) => { 
+                setTaskDescription(e.target.value) 
+              }} />
             </IonItem>
           </IonContent>
         </IonModal>
