@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Storage } from '@ionic/storage';
 
-
 const Tab1: React.FC = () => {
 
   const store = new Storage();
